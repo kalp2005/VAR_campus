@@ -1,99 +1,230 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Advanced Virtual Campus</title>
+    <title>Campus Master - Full Layout</title>
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
+    <script src="https://unpkg.com/aframe-look-at-component@0.8.0/dist/aframe-look-at-component.min.js"></script>
 
-<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
+    <style>
+        body { margin: 0; overflow: hidden; font-family: 'Segoe UI', sans-serif; background: #000; }
+        
+        #welcome-popup {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); color: white; z-index: 2000;
+            display: flex; justify-content: center; align-items: center;
+        }
+        #popup-content {
+            background: #1a1a1a; padding: 40px; border-radius: 20px; border: 2px solid #4CC3D9;
+            text-align: center; max-width: 450px; box-shadow: 0 0 30px rgba(76, 195, 217, 0.4);
+        }
+        #popup-content button { 
+            background: #4CC3D9; color: black; border: none; padding: 12px 40px; 
+            font-weight: bold; border-radius: 30px; cursor: pointer; margin-top: 20px;
+        }
 
+        #minimap-container {
+            position: fixed; bottom: 30px; right: 30px; width: 220px; height: 220px;
+            background: rgba(15, 15, 15, 0.95); border: 3px solid #4CC3D9; border-radius: 50%;
+            overflow: hidden; z-index: 1000; box-shadow: 0 0 20px rgba(0,0,0,1);
+        }
+        #minimap { width: 100%; height: 100%; }
+
+        #ui { position: fixed; bottom: 30px; left: 30px; z-index: 999; }
+        .fly-btn { padding: 15px 25px; cursor: pointer; border-radius: 50px; border: 2px solid #4CC3D9; background: rgba(0,0,0,0.8); color: white; font-weight: bold; }
+    </style>
 </head>
-
 <body>
 
-<a-scene>
+<div id="welcome-popup">
+    <div id="popup-content">
+        <h2>CAMPUS DIRECTORY</h2>
+        <p>Follow the black paths to navigate according to the map diagram.</p>
+        <ul style="text-align: left;">
+            <li>⌨️ <b>WASD</b>: Walk</li>
+            <li>⚡ <b>SHIFT</b>: Sprint (Turbo)</li>
+            <li>🚀 <b>P</b>: Flight Mode</li>
+            <li>🔼 <b>Space</b>: Up | 🔽 <b>X</b>: Down</li>
+        </ul>
+        <button onclick="closePopup()">ENTER CAMPUS</button>
+    </div>
+</div>
 
-<!-- ================= ASSETS ================= -->
-<a-assets>
-  <a-asset-item id="building" src="https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models/2.0/Box/glTF/Box.gltf"></a-asset-item>
-</a-assets>
+<div id="ui">
+    <button id="flyBtn" class="fly-btn" onclick="toggleFly()">✈️ ENABLE FLIGHT (P)</button>
+</div>
 
-<!-- ================= SKY ================= -->
-<a-sky color="#87CEEB"></a-sky>
+<div id="minimap-container">
+    <canvas id="minimap" width="220" height="220"></canvas>
+</div>
 
-<!-- ================= CAMERA + TELEPORT ================= -->
-<a-entity id="rig" position="0 1.6 30">
-  <a-camera look-controls wasd-controls></a-camera>
-  <a-entity laser-controls="hand: right"
-            raycaster="objects: .teleport"
-            teleport-controls="cameraRig: #rig">
-  </a-entity>
-</a-entity>
+<a-scene fog="type: exponential; color: #bed6f7; density: 0.0006">
+    <a-assets>
+        <a-mixin id="label" look-at="#player-cam" align="center" color="#000" scale="5 5 5"></a-mixin>
+        <a-mixin id="road" material="color: #222; opacity: 0.9" geometry="primitive: plane"></a-mixin>
+    </a-assets>
 
-<!-- ================= LIGHTING ================= -->
-<a-light type="ambient" intensity="0.6"></a-light>
-<a-light type="directional" position="0 15 10"></a-light>
+    <a-entity id="rig" position="-180 1.6 -200" movement-controls="speed:0.8; fly:false">
+        <a-camera id="player-cam" look-controls pointer-lock-enabled="true">
+            <a-cursor color="#4CC3D9" scale="0.5 0.5"></a-cursor>
+        </a-camera>
+    </a-entity>
 
-<!-- ================= GROUND ================= -->
-<a-plane rotation="-90 0 0" width="200" height="200" color="#7BC8A4" class="teleport"></a-plane>
+    <a-sky color="#bed6f7"></a-sky>
+    <a-light type="ambient" intensity="0.8"></a-light>
+    <a-light type="directional" position="10 50 10" intensity="0.5"></a-light>
+    
+    <a-plane rotation="-90 0 0" width="2500" height="2500" color="#567d46"></a-plane>
 
-<!-- ================= MAIN ROAD ================= -->
-<a-plane rotation="-90 0 0" width="10" height="200" color="#555" position="0 0 0"></a-plane>
+    <a-entity id="paths" position="0 0.02 0">
+        <a-entity mixin="road" rotation="-90 0 0" scale="8 500 1" position="-180 0 0" class="road-obj"></a-entity>
+        <a-entity mixin="road" rotation="-90 0 0" scale="500 8 1" position="50 0 -180" class="road-obj"></a-entity>
+        <a-entity mixin="road" rotation="-90 0 0" scale="400 6 1" position="20 0 0" class="road-obj"></a-entity>
+        <a-entity mixin="road" rotation="-90 0 0" scale="6 100 1" position="0 0 200" class="road-obj"></a-entity>
+        <a-entity mixin="road" rotation="-90 0 0" scale="450 6 1" position="100 0 150" class="road-obj"></a-entity>
+    </a-entity>
 
-<!-- ================= MAIN GATE ================= -->
-<a-entity position="0 0 40">
-  <a-gltf-model src="#building" scale="6 6 1"></a-gltf-model>
-  <a-text value="MAIN GATE" position="0 6 3" align="center"></a-text>
-</a-entity>
+    <a-entity position="-180 0 -230">
+        <a-box width="25" height="12" depth="12" color="#ff9eb5" class="map-obj" data-label="GATE"></a-box>
+        <a-text value="MAIN GATE" position="0 14 0" mixin="label"></a-text>
+    </a-entity>
 
-<!-- ================= PARKING + CRICKET ================= -->
-<a-entity position="0 0 10">
-  <a-gltf-model src="#building" scale="10 3 10"></a-gltf-model>
-  <a-text value="PARKING + CRICKET GROUND" position="0 5 8" align="center"></a-text>
-</a-entity>
+    <a-entity position="-130 0 0">
+        <a-box width="50" height="20" depth="140" color="#7CFC00" class="map-obj" data-label="A-BLK"></a-box>
+        <a-text value="A BLOCK" position="0 25 0" mixin="label" scale="12 12 12"></a-text>
+    </a-entity>
 
-<!-- ================= BOYS HOSTEL ================= -->
-<a-entity position="0 0 -40">
-  <a-gltf-model src="#building" scale="8 6 6"></a-gltf-model>
-  <a-text value="BOYS HOSTEL" position="0 7 6" align="center"></a-text>
-</a-entity>
+    <a-entity position="0 0.5 -120">
+        <a-box width="100" height="1" depth="80" color="#999" class="map-obj" data-label="CRICKET"></a-box>
+        <a-text value="PARKING + CRICKET" position="0 6 0" mixin="label"></a-text>
+    </a-entity>
 
-<!-- ================= RIGHT ROAD ================= -->
-<a-plane rotation="-90 0 0" width="80" height="10" color="#555" position="40 0 20"></a-plane>
+    <a-entity position="200 0 -180">
+        <a-box width="50" height="20" depth="40" color="#ffcc99" class="map-obj" data-label="BOYS"></a-box>
+        <a-text value="BOYS HOSTEL" position="0 25 0" mixin="label"></a-text>
+    </a-entity>
 
-<!-- ================= A BLOCK ================= -->
-<a-entity position="40 0 20">
-  <a-gltf-model src="#building" scale="6 6 6"></a-gltf-model>
-  <a-text value="A BLOCK" position="0 7 6" align="center"></a-text>
-</a-entity>
+    <a-entity position="-40 0 30">
+        <a-box width="35" height="10" depth="25" color="#5dade2" class="map-obj" data-label="WH"></a-box>
+        <a-text value="WAREHOUSE" position="0 12 0" mixin="label"></a-text>
+    </a-entity>
 
-<!-- ================= C BLOCK ================= -->
-<a-entity position="60 0 20">
-  <a-gltf-model src="#building" scale="6 6 6"></a-gltf-model>
-  <a-text value="C BLOCK" position="0 7 6" align="center"></a-text>
-</a-entity>
+    <a-box position="-40 3 -40" width="10" height="6" depth="10" color="#5dade2" class="map-obj" data-label="CANTEEN"></a-box>
+    <a-box position="-10 3 80" width="10" height="6" depth="10" color="#5dade2" class="map-obj" data-label="CANTEEN"></a-box>
+    <a-box position="250 3 -100" width="12" height="6" depth="12" color="#5dade2" class="map-obj" data-label="CANTEEN"></a-box>
 
-<!-- ================= CANTEEN ================= -->
-<a-entity position="50 0 0">
-  <a-gltf-model src="#building" scale="4 4 4"></a-gltf-model>
-  <a-text value="CANTEEN" position="0 6 5" align="center"></a-text>
-</a-entity>
+    <a-entity position="-130 0.2 180">
+        <a-box width="70" height="1" depth="60" color="#ff8c00" class="map-obj" data-label="GARDEN"></a-box>
+        <a-text value="GARDEN" position="0 8 0" mixin="label"></a-text>
+    </a-entity>
+    <a-entity position="100 0.2 30">
+        <a-box width="60" height="1" depth="60" color="#ff8c00" class="map-obj" data-label="GARDEN"></a-box>
+        <a-text value="GARDEN" position="0 8 0" mixin="label"></a-text>
+    </a-entity>
 
-<!-- ================= TREES ================= -->
-<a-cylinder position="20 2 5" radius="0.5" height="4" color="brown"></a-cylinder>
-<a-sphere position="20 5 5" radius="2" color="green"></a-sphere>
+    <a-entity position="230 0 50">
+        <a-box width="160" height="20" depth="120" color="#ff7043" class="map-obj" data-label="C-BLK"></a-box>
+        <a-text value="C BLOCK" position="0 25 0" mixin="label" scale="15 15 15"></a-text>
+    </a-entity>
 
-<a-cylinder position="30 2 -5" radius="0.5" height="4" color="brown"></a-cylinder>
-<a-sphere position="30 5 -5" radius="2" color="green"></a-sphere>
+    <a-entity position="-50 0 180">
+        <a-box width="90" height="15" depth="60" color="#f1c40f" class="map-obj" data-label="B-BLK"></a-box>
+        <a-text value="B BLOCK" position="0 18 0" mixin="label"></a-text>
+    </a-entity>
 
-<!-- ================= BENCH ================= -->
-<a-box position="10 0.5 15" width="3" height="0.5" depth="1" color="#8B4513"></a-box>
+    <a-entity position="0 0 280">
+        <a-box width="50" height="25" depth="50" color="#ffcc99" class="map-obj" data-label="GIRLS"></a-box>
+        <a-text value="GIRLS HOSTEL" position="0 30 0" mixin="label"></a-text>
+    </a-entity>
 
-<!-- ================= MINI MAP ================= -->
-<a-plane position="0 8 -5" width="6" height="6" color="black"></a-plane>
-<a-text value="MINI MAP\n↑ Parking\n→ Academic\n↓ Hostel"
-position="0 8 -4.9" align="center" color="white"></a-text>
+    <a-entity position="180 0.5 150">
+        <a-box width="180" height="1" depth="40" color="#999" class="map-obj" data-label="PARKING"></a-box>
+        <a-text value="PARKING" position="0 6 0" mixin="label"></a-text>
+    </a-entity>
+
+    <a-entity position="350 0.2 160">
+        <a-box width="80" height="1" depth="100" color="#7CFC00" class="map-obj" data-label="TURF"></a-box>
+        <a-text value="TURF" position="0 8 0" mixin="label"></a-text>
+    </a-entity>
 
 </a-scene>
+
+<script>
+    let fly = false;
+    const rig = document.querySelector("#rig");
+    const cam = document.querySelector("#player-cam");
+    const canvas = document.getElementById('minimap');
+    const ctx = canvas.getContext('2d');
+
+    function closePopup() { document.getElementById('welcome-popup').style.display = 'none'; }
+
+    window.addEventListener("keydown", e => {
+        if (e.key.toLowerCase() === "p") {
+            fly = !fly;
+            rig.setAttribute("movement-controls", `speed:${fly?1.5:0.8}; fly:${fly}`);
+            document.getElementById("flyBtn").innerText = fly ? "DISABLE FLIGHT (P)" : "ENABLE FLIGHT (P)";
+        }
+        if (e.shiftKey) rig.setAttribute("movement-controls", `speed:2.5; fly:${fly}`);
+        if (fly) {
+            if (e.code === "Space") rig.object3D.position.y += 2;
+            if (e.code === "KeyX") rig.object3D.position.y -= 2;
+        }
+    });
+
+    window.addEventListener("keyup", e => {
+        if (!e.shiftKey) rig.setAttribute("movement-controls", `speed:0.8; fly:${fly}`);
+    });
+
+    function toggleFly() { window.dispatchEvent(new KeyboardEvent('keydown', {'key': 'p'})); }
+
+    // --- ENHANCED GPS MINIMAP ---
+    function drawMinimap() {
+        ctx.clearRect(0,0,220,220);
+        const centerX = 110, centerY = 110, zoom = 0.45;
+        const pPos = rig.object3D.position;
+        const pRot = cam.object3D.rotation.y;
+
+        ctx.save();
+        ctx.translate(centerX, centerY);
+        ctx.rotate(pRot);
+
+        // Draw Paths on Minimap
+        document.querySelectorAll('.road-obj').forEach(road => {
+            const pos = road.object3D.position;
+            const w = road.getAttribute('scale').x * zoom;
+            const h = road.getAttribute('scale').y * zoom;
+            ctx.fillStyle = "#333";
+            ctx.fillRect((pos.x - pPos.x)*zoom - w/2, (pos.z - pPos.z)*zoom - h/2, w, h);
+        });
+
+        // Draw Buildings on Minimap
+        document.querySelectorAll('.map-obj').forEach(el => {
+            const pos = el.object3D.position;
+            const w = el.getAttribute('width') * zoom;
+            const d = (el.getAttribute('depth') || 20) * zoom;
+            ctx.fillStyle = el.getAttribute('color');
+            ctx.fillRect((pos.x - pPos.x)*zoom - w/2, (pos.z - pPos.z)*zoom - d/2, w, d);
+            
+            ctx.fillStyle = "white";
+            ctx.font = "bold 9px Arial";
+            ctx.textAlign = "center";
+            ctx.fillText(el.dataset.label, (pos.x - pPos.x)*zoom, (pos.z - pPos.z)*zoom + 4);
+        });
+
+        ctx.restore();
+
+        // Fixed Player Marker
+        ctx.fillStyle = "#4CC3D9";
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY - 12);
+        ctx.lineTo(centerX + 8, centerY + 8);
+        ctx.lineTo(centerX - 8, centerY + 8);
+        ctx.fill();
+
+        requestAnimationFrame(drawMinimap);
+    }
+    drawMinimap();
+</script>
 
 </body>
 </html>
