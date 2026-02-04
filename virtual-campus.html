@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advanced Virtual Campus</title>
+
+<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
+
+</head>
+
+<body>
+
+<a-scene>
+
+<!-- ================= ASSETS ================= -->
+<a-assets>
+  <a-asset-item id="building" src="https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models/2.0/Box/glTF/Box.gltf"></a-asset-item>
+</a-assets>
+
+<!-- ================= SKY ================= -->
+<a-sky color="#87CEEB"></a-sky>
+
+<!-- ================= CAMERA + TELEPORT ================= -->
+<a-entity id="rig" position="0 1.6 30">
+  <a-camera look-controls wasd-controls></a-camera>
+  <a-entity laser-controls="hand: right"
+            raycaster="objects: .teleport"
+            teleport-controls="cameraRig: #rig">
+  </a-entity>
+</a-entity>
+
+<!-- ================= LIGHTING ================= -->
+<a-light type="ambient" intensity="0.6"></a-light>
+<a-light type="directional" position="0 15 10"></a-light>
+
+<!-- ================= GROUND ================= -->
+<a-plane rotation="-90 0 0" width="200" height="200" color="#7BC8A4" class="teleport"></a-plane>
+
+<!-- ================= MAIN ROAD ================= -->
+<a-plane rotation="-90 0 0" width="10" height="200" color="#555" position="0 0 0"></a-plane>
+
+<!-- ================= MAIN GATE ================= -->
+<a-entity position="0 0 40">
+  <a-gltf-model src="#building" scale="6 6 1"></a-gltf-model>
+  <a-text value="MAIN GATE" position="0 6 3" align="center"></a-text>
+</a-entity>
+
+<!-- ================= PARKING + CRICKET ================= -->
+<a-entity position="0 0 10">
+  <a-gltf-model src="#building" scale="10 3 10"></a-gltf-model>
+  <a-text value="PARKING + CRICKET GROUND" position="0 5 8" align="center"></a-text>
+</a-entity>
+
+<!-- ================= BOYS HOSTEL ================= -->
+<a-entity position="0 0 -40">
+  <a-gltf-model src="#building" scale="8 6 6"></a-gltf-model>
+  <a-text value="BOYS HOSTEL" position="0 7 6" align="center"></a-text>
+</a-entity>
+
+<!-- ================= RIGHT ROAD ================= -->
+<a-plane rotation="-90 0 0" width="80" height="10" color="#555" position="40 0 20"></a-plane>
+
+<!-- ================= A BLOCK ================= -->
+<a-entity position="40 0 20">
+  <a-gltf-model src="#building" scale="6 6 6"></a-gltf-model>
+  <a-text value="A BLOCK" position="0 7 6" align="center"></a-text>
+</a-entity>
+
+<!-- ================= C BLOCK ================= -->
+<a-entity position="60 0 20">
+  <a-gltf-model src="#building" scale="6 6 6"></a-gltf-model>
+  <a-text value="C BLOCK" position="0 7 6" align="center"></a-text>
+</a-entity>
+
+<!-- ================= CANTEEN ================= -->
+<a-entity position="50 0 0">
+  <a-gltf-model src="#building" scale="4 4 4"></a-gltf-model>
+  <a-text value="CANTEEN" position="0 6 5" align="center"></a-text>
+</a-entity>
+
+<!-- ================= TREES ================= -->
+<a-cylinder position="20 2 5" radius="0.5" height="4" color="brown"></a-cylinder>
+<a-sphere position="20 5 5" radius="2" color="green"></a-sphere>
+
+<a-cylinder position="30 2 -5" radius="0.5" height="4" color="brown"></a-cylinder>
+<a-sphere position="30 5 -5" radius="2" color="green"></a-sphere>
+
+<!-- ================= BENCH ================= -->
+<a-box position="10 0.5 15" width="3" height="0.5" depth="1" color="#8B4513"></a-box>
+
+<!-- ================= MINI MAP ================= -->
+<a-plane position="0 8 -5" width="6" height="6" color="black"></a-plane>
+<a-text value="MINI MAP\n↑ Parking\n→ Academic\n↓ Hostel"
+position="0 8 -4.9" align="center" color="white"></a-text>
+
+</a-scene>
+
+</body>
+</html>
